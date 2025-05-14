@@ -3,8 +3,8 @@ import axios from 'axios';
 export const generateBoard = async (payload) => {
   const sampleJSON = {
     data: {
-      boardId: 2013655268,
-      boardName: 'My test1',
+      boardId: 1234567890,
+      boardName: 'My test2 board',
       items: [
         {
           id: 1,
@@ -31,6 +31,7 @@ export const generateBoard = async (payload) => {
 
   try {
     // Step 1: Read the board
+     if (payload.triggerError) throw new Error("Test error");
     const readQuery = {
       query: `query {
         boards (ids: ${boardId}) {
@@ -105,6 +106,8 @@ export const generateBoard = async (payload) => {
 
 export const getBoard = async (payload) => {
   try {
+    if (payload.triggerError) throw new Error("Test error");
+
     const sampleData = {
       data: {
         boardId: 1,
@@ -126,15 +129,19 @@ export const getBoard = async (payload) => {
           }
         ]
       },
-    }
+    };
 
-    return { statusCode: 200, statusMessage: "Fetched successfully", data: sampleData };
+    return {
+      statusCode: 200,
+      statusMessage: "Fetched successfully",
+      data: sampleData,
+    };
   } catch (error) {
-    return res.status(400).json({
+    return {
       statusCode: 400,
       data: {},
       message: "Validation error.",
       error: error.message,
-    });
+    };
   }
 };
