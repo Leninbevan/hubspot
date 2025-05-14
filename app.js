@@ -11,8 +11,6 @@ app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 
-app.use("/api/v1/board", boardRouter);
-
 const options = {
     definition: {
         openapi: '3.0.0',
@@ -31,6 +29,8 @@ const options = {
 
 const swaggerSpec = swaggerJSDoc(options);
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
+
+app.use("/api/v1/board", boardRouter);
 
 app.listen(8000, () => {
     console.log("Server is running on port 8000");
