@@ -23,7 +23,9 @@ const router = express.Router();
  *         description: Successfully created a board
  *       400:
  *         description: Bad Request
- */
+*/
+
+router.post("/createBoard", createBoard);
 
 /**
  * @swagger
@@ -53,7 +55,6 @@ const router = express.Router();
  *         description: Server error
  */
 
-router.post("/createBoard", createBoard);
 router.get("/getBoardItems", getboard);
 
 export default router;
