@@ -4,6 +4,7 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit'; 
+import mongoose from 'mongoose';
 
 dotenv.config();
 
@@ -65,6 +66,8 @@ app.use((err, req, res, next) => {
     },
   });
 });
+
+mongoose.connect(process.env.MONGO_URI).then(()=>console.log("MongoDB conncted")).catch((err)=>console.error("MongoDB connection error:", err))
 
 app.listen(8000, () => {
     console.log("Server is running on port 8000");
