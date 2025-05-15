@@ -2,6 +2,8 @@ import express from "express";
 import boardRouter from "./routes/boardRoutes.js";
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUI from 'swagger-ui-express';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 

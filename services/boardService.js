@@ -8,9 +8,9 @@ export const generateBoard = async (webhookPayload) => {
     contactEmail,
   } = webhookPayload;
   const boardId = 2012772463;
-  const API_URL = "https://api.monday.com/v2";
-  const API_TOKEN =
-    "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjUxMjYwMTc2OCwiYWFpIjoxMSwidWlkIjo3NTk4NzQxNiwiaWFkIjoiMjAyNS0wNS0xNFQwODoxODozMS40ODZaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6Mjk0OTk3MTQsInJnbiI6ImFwc2UyIn0.HetuZhl4nrQWNCJp2RaJ1MBawlOQppz82z8efbWrIEQ";
+  // const API_URL = "https://api.monday.com/v2";
+  // const API_TOKEN =
+  //   "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjUxMjYwMTc2OCwiYWFpIjoxMSwidWlkIjo3NTk4NzQxNiwiaWFkIjoiMjAyNS0wNS0xNFQwODoxODozMS40ODZaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6Mjk0OTk3MTQsInJnbiI6ImFwc2UyIn0.HetuZhl4nrQWNCJp2RaJ1MBawlOQppz82z8efbWrIEQ";
   const columnValues = {
     status: { label: dealStage === "closedwon" ? "Closed Won" : "Open" },
     numbers: parseFloat(dealAmount),
@@ -31,10 +31,10 @@ export const generateBoard = async (webhookPayload) => {
     }`,
   };
   try {
-    const response = await axios.post(API_URL, mutationQuery, {
+    const response = await axios.post(process.env.API_URL, mutationQuery, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${API_TOKEN}`,
+        Authorization: `Bearer ${process.env.API_TOKEN}`,
       },
     });
     const createdItemId = response.data?.data?.create_item?.id;
@@ -61,7 +61,7 @@ export const getBoard = async (payload) => {
       objectId: "56789",
       objectType: "DEAL",
       propertyValue: "closedwon",
-      dealName: "Acme Corp Implementation",
+      dealName: "Test ACM",
       dealAmount: "25000",
       contactEmail: "john.doe@acme.com",
     };
