@@ -6,7 +6,8 @@ const router = express.Router();
 
 const checkTokenExpiry = async (req, res, next) => {
     const header = req.headers['authorization'];
-    if (typeof header !== undefined) {
+
+    if (header !== undefined) {
         const bearer = header.split(' ');
         const token = bearer[1];
         try {
@@ -24,8 +25,7 @@ const checkTokenExpiry = async (req, res, next) => {
             return res.status(500).json({ success: 'false', message: 'Error decoding token' });
         }
     } else {
-        console.log("Isnide");
-        res.sendStatus(403);
+        res.status(403).json({ success: 'false', message: 'Unauthorized access' });
     }
 }
 
