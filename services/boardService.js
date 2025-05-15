@@ -8,9 +8,6 @@ export const generateBoard = async (webhookPayload) => {
     contactEmail,
   } = webhookPayload;
   const boardId = 2012772463;
-  // const API_URL = "https://api.monday.com/v2";
-  // const API_TOKEN =
-  //   "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjUxMjYwMTc2OCwiYWFpIjoxMSwidWlkIjo3NTk4NzQxNiwiaWFkIjoiMjAyNS0wNS0xNFQwODoxODozMS40ODZaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6Mjk0OTk3MTQsInJnbiI6ImFwc2UyIn0.HetuZhl4nrQWNCJp2RaJ1MBawlOQppz82z8efbWrIEQ";
   const columnValues = {
     status: { label: dealStage === "closedwon" ? "Closed Won" : "Open" },
     numbers: parseFloat(dealAmount),
@@ -47,35 +44,6 @@ export const generateBoard = async (webhookPayload) => {
     return {
       statusCode: 500,
       message: "Failed to create item on Monday.com",
-      error: error.message,
-    };
-  }
-};
-
-export const getBoard = async (payload) => {
-  try {
-    const sampleData = {
-      eventId: "123456",
-      eventType: "deal.propertyChange",
-      propertyName: "dealstage",
-      objectId: "56789",
-      objectType: "DEAL",
-      propertyValue: "closedwon",
-      dealName: "Test ACM",
-      dealAmount: "25000",
-      contactEmail: "john.doe@acme.com",
-    };
-
-    return {
-      statusCode: 200,
-      statusMessage: "Fetched successfully",
-      data: sampleData,
-    };
-  } catch (error) {
-    return {
-      statusCode: 400,
-      data: {},
-      message: "Validation error.",
       error: error.message,
     };
   }

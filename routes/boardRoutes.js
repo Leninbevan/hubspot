@@ -1,5 +1,5 @@
 import express from "express";
-import { createBoard, getboard } from "../controllers/boardControllers.js";
+import { createBoard } from "../controllers/boardControllers.js";
 
 const router = express.Router();
 
@@ -26,35 +26,5 @@ const router = express.Router();
 */
 
 router.post("/createBoard", createBoard);
-
-/**
- * @swagger
- * /api/v1/board/getBoardItems:
- *   get:
- *     summary: Retrieve all board items
- *     responses:
- *       200:
- *         description: A list of board items
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                     example: "abc123"
- *                   name:
- *                     type: string
- *                     example: "Sample Board"
- *                   validity:
- *                     type: boolean
- *                     example: true
- *       500:
- *         description: Server error
- */
-
-router.get("/getBoardItems", getboard);
 
 export default router;
