@@ -34,6 +34,8 @@ const checkTokenExpiry = async (req, res, next) => {
  * /api/v1/board/createBoard:
  *   post:
  *     summary: Create board Items
+ *     security:
+ *       - bearerAuth: []  # Requires JWT
  *     requestBody:
  *       required: true
  *       content:
@@ -41,15 +43,39 @@ const checkTokenExpiry = async (req, res, next) => {
  *           schema:
  *             type: object
  *             properties:
- *               validity:
- *                 type: boolean
- *                 example: true
+ *               eventId:
+ *                 type: string
+ *                 example: "155446"
+ *               eventType:
+ *                 type: string
+ *                 example: "deal.propertyChange"
+ *               propertyName:
+ *                 type: string
+ *                 example: "dealstage"
+ *               objectId:
+ *                 type: string
+ *                 example: "56789"
+ *               objectType:
+ *                 type: string
+ *                 example: "DEAL"
+ *               propertyValue:
+ *                 type: string
+ *                 example: "closedwon"
+ *               dealName:
+ *                 type: string
+ *                 example: "ACM test1"
+ *               dealAmount:
+ *                 type: string
+ *                 example: "25000"
+ *               contactEmail:
+ *                 type: string
+ *                 example: "john.doe@acme.com"
  *     responses:
  *       200:
  *         description: Successfully created a board
  *       400:
  *         description: Bad Request
-*/
+ */
 
 router.post("/createBoard", checkTokenExpiry, createBoard);
 
