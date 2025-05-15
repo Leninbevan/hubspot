@@ -1,15 +1,14 @@
 import { generateBoard } from "../services/boardService.js";
 
-export const createBoard = async (req, res) => {
+export const createBoard = async (req, res, next) => {
   try {
     const response = await generateBoard(req.body);
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({
-      statusCode: 500,
-      message: "Internal server error",
-      error: error.message,
+    next({
+      status: error.status || 500,
+      message: error.message,
+      details: error.details || undefined,
     });
   }
 };
-

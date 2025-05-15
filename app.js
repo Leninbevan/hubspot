@@ -56,6 +56,15 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 app.use("/api/v1/board", boardRouter);
 
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    error: {
+      status: err.status || 500,
+      message: err.message || "Internal server error",
+      details: err.details || undefined,
+    },
+  });
+});
 
 app.listen(8000, () => {
     console.log("Server is running on port 8000");
