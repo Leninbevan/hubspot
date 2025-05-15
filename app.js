@@ -10,19 +10,33 @@ const app = express();
 app.use(express.json());
 
 const options = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'Board Routes API',
-            version: '1.0.0'
-        },
-        servers: [
-            {
-                url: 'http://localhost:8000'
-            }
-        ]
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Board Routes API',
+      version: '1.0.0',
     },
-    apis: ['./routes/boardRoutes.js'] 
+    servers: [
+      {
+        url: 'http://localhost:8000',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
+  },
+  apis: ['./routes/boardRoutes.js'], 
 };
 
 const swaggerSpec = swaggerJSDoc(options);
