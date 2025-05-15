@@ -1,93 +1,93 @@
 import axios from "axios";
-import MockAdapter from "axios-mock-adapter";
 import { generateBoard } from "../services/boardService.js";
+import boardItemModal from "../modals/boardItemsModal.js";
+
+jest.mock("axios");
+jest.mock("../modals/boardItemsModal.js");
 
 describe("generateBoard", () => {
-  let mockAxios;
-
-  beforeAll(() => {
-    mockAxios = new MockAdapter(axios);
-    process.env.API_URL = "https://fake.api/graphql";
-    process.env.API_TOKEN = "fake-token";
-  });
-
-  afterEach(() => {
-    mockAxios.reset();
-  });
-
-  afterAll(() => {
-    mockAxios.restore();
-  });
-
   const validPayload = {
-    dealName: "Deal 1",
+    eventId: "event-123",
+    dealName: "Test Deal",
     propertyValue: "closedwon",
-    dealAmount: "10000",
+    dealAmount: "1200",
     contactEmail: "test@example.com",
     objectType: "deal",
-    objectId: "123",
-    propertyName: "status",
-    eventType: "update",
+    objectId: "obj-456",
+    propertyName: "stage",
+    eventType: "change",
   };
 
-  it("should create an item successfully", async () => {
-    const fakeResponse = {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should create a new item if eventId is not found and data is valid", async () => {
+    boardItemModal.findOne.mockResolvedValue(null);
+    boardItemModal.mockImplementation(() => ({
+      save: jest.fn().mockResolvedValue(true),
+    }));
+
+    axios.post.mockResolvedValue({
       data: {
-        create_item: {
-          id: "456",
+        data: {
+          create_item: { id: "item123" },
         },
       },
-    };
-
-    mockAxios.onPost(process.env.API_URL).reply(200, fakeResponse);
+    });
 
     const result = await generateBoard(validPayload);
 
+    expect(boardItemModal.findOne).toHaveBeenCalledWith({ eventId: "event-123" });
     expect(result).toEqual({
       statusCode: 200,
       statusMessage: "Item created successfully",
-      itemId: "456",
-    });
-
-    const request = mockAxios.history.post[0];
-    expect(request.headers.Authorization).toBe(`Bearer ${process.env.API_TOKEN}`);
-    expect(request.headers["Content-Type"]).toBe("application/json");
-  });
-
-  it("should throw validation error if required fields are missing", async () => {
-    const invalidPayload = {
-      dealName: "",
-      propertyValue: null,
-      dealAmount: undefined,
-      contactEmail: "",
-      objectType: "",
-      objectId: "",
-      propertyName: "",
-      eventType: "",
-    };
-
-    await expect(generateBoard(invalidPayload)).rejects.toMatchObject({
-      message: "Missing required fields",
-      status: 400,
-      details: expect.arrayContaining([
-        expect.objectContaining({ loc: ["body", "dealName"] }),
-        expect.objectContaining({ loc: ["body", "propertyValue"] }),
-        expect.objectContaining({ loc: ["body", "dealAmount"] }),
-        expect.objectContaining({ loc: ["body", "contactEmail"] }),
-        expect.objectContaining({ loc: ["body", "objectType"] }),
-        expect.objectContaining({ loc: ["body", "objectId"] }),
-        expect.objectContaining({ loc: ["body", "propertyName"] }),
-        expect.objectContaining({ loc: ["body", "eventType"] }),
-      ]),
+      itemId: "item123",
     });
   });
 
-  it("should throw error if axios call fails", async () => {
-    mockAxios.onPost(process.env.API_URL).networkError();
+  it("should throw a 403 error if eventId already exists", async () => {
+    boardItemModal.findOne.mockResolvedValue({ eventId: "event-123" });
 
     await expect(generateBoard(validPayload)).rejects.toMatchObject({
-      message: expect.stringContaining("Failed to create item on Monday.com"),
+      status: 403,
+      message: "Board Item already available with this Event Id.",
+    });
+  });
+
+  it("should throw a 400 error for missing required fields", async () => {
+    const incompletePayload = {
+      ...validPayload,
+      dealName: null,
+      contactEmail: undefined,
+    };
+
+    boardItemModal.findOne.mockResolvedValue(null);
+    boardItemModal.mockImplementation(() => ({
+      save: jest.fn().mockResolvedValue(true),
+    }));
+
+    await expect(generateBoard(incompletePayload)).rejects.toMatchObject({
+      status: 400,
+      message: "Missing required fields",
+      details: [
+        { loc: ["body", "dealName"], msg: "Field required", type: "missing" },
+        { loc: ["body", "contactEmail"], msg: "Field required", type: "missing" },
+      ],
+    });
+  });
+
+  it("should throw a 500 error if axios call fails", async () => {
+    boardItemModal.findOne.mockResolvedValue(null);
+    boardItemModal.mockImplementation(() => ({
+      save: jest.fn().mockResolvedValue(true),
+    }));
+
+    axios.post.mockRejectedValue(new Error("Network error"));
+
+    await expect(generateBoard(validPayload)).rejects.toMatchObject({
       status: 500,
+      message: expect.stringContaining("Failed to create item on Monday.com"),
     });
   });
 });

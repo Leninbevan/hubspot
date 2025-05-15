@@ -2,15 +2,14 @@ import express from "express";
 import request from "supertest";
 import { createBoard } from "../controllers/boardControllers.js";
 import * as boardService from "../services/boardService.js";
-import boardItemModal from "../modals/boardItemsModal.js";
 
 jest.mock("../services/boardService.js");
-jest.mock("../modals/boardItemsModal.js");
 
 const app = express();
 app.use(express.json());
 app.post("/api/v1/board/create", createBoard);
 
+// Capture errors with a test-friendly error middleware
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     message: err.message,
@@ -20,7 +19,6 @@ app.use((err, req, res, next) => {
 
 describe("createBoard controller", () => {
   const mockPayload = {
-    eventId: "event-123",
     dealName: "Test Deal",
     propertyValue: "closedwon",
     dealAmount: "1000",
@@ -35,57 +33,41 @@ describe("createBoard controller", () => {
     jest.clearAllMocks();
   });
 
-  it("should return 403 if eventId already exists", async () => {
-    boardItemModal.findOne.mockResolvedValue({ _id: "abc123" });
-
-    const res = await request(app).post("/api/v1/board/create").send(mockPayload);
-
-    expect(res.statusCode).toBe(403);
-    expect(res.body).toEqual({
-      success: false,
-      message: "Board Item already available with this Event Id.",
-    });
-  });
-
-  it("should create item and return success response", async () => {
-    boardItemModal.findOne.mockResolvedValue(null);
-    boardItemModal.mockImplementation(() => ({
-      save: jest.fn().mockResolvedValue(true),
-    }));
-
+  it("should return 200 and result from generateBoard", async () => {
     boardService.generateBoard.mockResolvedValue({
       statusCode: 200,
       statusMessage: "Item created successfully",
-      itemId: "xyz456",
+      itemId: "xyz789",
     });
 
-    const res = await request(app).post("/api/v1/board/create").send(mockPayload);
+    const res = await request(app)
+      .post("/api/v1/board/create")
+      .send(mockPayload);
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       statusCode: 200,
       statusMessage: "Item created successfully",
-      itemId: "xyz456",
+      itemId: "xyz789",
     });
+    expect(boardService.generateBoard).toHaveBeenCalledWith(mockPayload);
   });
 
-  it("should handle service error and pass it to next", async () => {
-    boardItemModal.findOne.mockResolvedValue(null);
-    boardItemModal.mockImplementation(() => ({
-      save: jest.fn().mockResolvedValue(true),
-    }));
-
+  it("should handle errors from generateBoard and call next", async () => {
     boardService.generateBoard.mockRejectedValue({
-      status: 500,
-      message: "Something went wrong",
+      status: 400,
+      message: "Missing required fields",
+      details: [{ loc: ["body", "dealName"], msg: "Field required" }],
     });
 
-    const res = await request(app).post("/api/v1/board/create").send(mockPayload);
+    const res = await request(app)
+      .post("/api/v1/board/create")
+      .send({}); // sending empty payload
 
-    expect(res.statusCode).toBe(500);
+    expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
-      message: "Something went wrong",
-      details: null,
+      message: "Missing required fields",
+      details: [{ loc: ["body", "dealName"], msg: "Field required" }],
     });
   });
 });
