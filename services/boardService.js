@@ -26,10 +26,10 @@ export const generateBoard = async (webhookPayload) => {
       propertyValue: dealStage,
       dealAmount,
       contactEmail,
-      objectType,
-      objectId,
-      propertyName,
-      eventType,
+      // objectType,
+      // objectId,
+      // propertyName,
+      // eventType,
     };
 
     const missingFields = Object.entries(requiredFields)
