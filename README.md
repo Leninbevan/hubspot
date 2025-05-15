@@ -2,6 +2,30 @@
 
 This mini task automates the creation of items on a Monday.com board using their GraphQL API.
 
+# Project Structure
+
+HUBSPOT/
+├── controllers/
+│   └── boardControllers.js          
+├── modals/
+│   └── boardItemsModal.js            
+├── node_modules/                    
+├── routes/
+│   └── boardRoutes.js               
+├── services/
+│   └── boardService.js              
+├── tests/
+│   ├── boardService.test.js         
+│   └── createBoardController.test.js
+├── .babelrc                         
+├── .env                             
+├── .gitignore                       
+├── app.js                           
+├── jest.config.js                   
+├── package-lock.json                
+├── package.json                     
+└── README.md                     
+
 ##  Setup Instructions
 
 ### 1. Clone the Repository
