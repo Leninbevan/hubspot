@@ -1,133 +1,93 @@
-import axios from 'axios';
-import { generateBoard, getBoard } from '../services/boardService';
+import axios from "axios";
+import MockAdapter from "axios-mock-adapter";
+import { generateBoard } from "../services/boardService.js";
 
-jest.mock('axios');
+describe("generateBoard", () => {
+  let mockAxios;
 
-describe('boardService', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeAll(() => {
+    mockAxios = new MockAdapter(axios);
+    process.env.API_URL = "https://fake.api/graphql";
+    process.env.API_TOKEN = "fake-token";
   });
 
-  describe('generateBoard', () => {
-    it('should return success if board exists and name matches', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          data: {
-            boards: [
-              {
-                id: 1234567890,
-                name: 'My test2 board',
-                columns: []
-              }
-            ]
-          }
-        }
-      });
+  afterEach(() => {
+    mockAxios.reset();
+  });
 
-      const result = await generateBoard({});
-      expect(result).toEqual({
-        statusCode: 200,
-        statusMessage: 'Created or updated successfully'
-      });
+  afterAll(() => {
+    mockAxios.restore();
+  });
+
+  const validPayload = {
+    dealName: "Deal 1",
+    propertyValue: "closedwon",
+    dealAmount: "10000",
+    contactEmail: "test@example.com",
+    objectType: "deal",
+    objectId: "123",
+    propertyName: "status",
+    eventType: "update",
+  };
+
+  it("should create an item successfully", async () => {
+    const fakeResponse = {
+      data: {
+        create_item: {
+          id: "456",
+        },
+      },
+    };
+
+    mockAxios.onPost(process.env.API_URL).reply(200, fakeResponse);
+
+    const result = await generateBoard(validPayload);
+
+    expect(result).toEqual({
+      statusCode: 200,
+      statusMessage: "Item created successfully",
+      itemId: "456",
     });
 
-    it('should return success if board does not exist and it gets created', async () => {
-      axios.post
-        .mockResolvedValueOnce({ data: { data: { boards: [] } } }) // read board returns empty
-        .mockResolvedValueOnce({ data: { data: { create_board: { id: 9876543210 } } } }); // create board
+    const request = mockAxios.history.post[0];
+    expect(request.headers.Authorization).toBe(`Bearer ${process.env.API_TOKEN}`);
+    expect(request.headers["Content-Type"]).toBe("application/json");
+  });
 
-      const result = await generateBoard({});
-      expect(result).toEqual({
-        statusCode: 200,
-        statusMessage: 'Created or updated successfully'
-      });
-    });
+  it("should throw validation error if required fields are missing", async () => {
+    const invalidPayload = {
+      dealName: "",
+      propertyValue: null,
+      dealAmount: undefined,
+      contactEmail: "",
+      objectType: "",
+      objectId: "",
+      propertyName: "",
+      eventType: "",
+    };
 
-    it('should return success if board exists and name is updated', async () => {
-      axios.post
-        .mockResolvedValueOnce({ // board exists, name mismatch
-          data: {
-            data: {
-              boards: [
-                {
-                  id: 1234567890,
-                  name: 'Old Board Name',
-                  columns: []
-                }
-              ]
-            }
-          }
-        })
-        .mockResolvedValueOnce({ data: { data: { update_board: true } } }); // update board
-
-      const result = await generateBoard({});
-      expect(result).toEqual({
-        statusCode: 200,
-        statusMessage: 'Created or updated successfully'
-      });
-    });
-
-    it('should return error if exception is thrown', async () => {
-      const result = await generateBoard({ triggerError: true });
-      expect(result).toEqual({
-        statusCode: 400,
-        data: {},
-        message: 'Validation error.',
-        error: 'Test error'
-      });
-    });
-
-    it('should return error if axios throws', async () => {
-      axios.post.mockRejectedValueOnce(new Error('Network error'));
-      const result = await generateBoard({});
-      expect(result).toEqual({
-        statusCode: 400,
-        data: {},
-        message: 'Validation error.',
-        error: 'Network error'
-      });
+    await expect(generateBoard(invalidPayload)).rejects.toMatchObject({
+      message: "Missing required fields",
+      status: 400,
+      details: expect.arrayContaining([
+        expect.objectContaining({ loc: ["body", "dealName"] }),
+        expect.objectContaining({ loc: ["body", "propertyValue"] }),
+        expect.objectContaining({ loc: ["body", "dealAmount"] }),
+        expect.objectContaining({ loc: ["body", "contactEmail"] }),
+        expect.objectContaining({ loc: ["body", "objectType"] }),
+        expect.objectContaining({ loc: ["body", "objectId"] }),
+        expect.objectContaining({ loc: ["body", "propertyName"] }),
+        expect.objectContaining({ loc: ["body", "eventType"] }),
+      ]),
     });
   });
 
-  describe('getBoard', () => {
-    it('should return sample board data', async () => {
-      const result = await getBoard({});
-      expect(result).toEqual({
-        statusCode: 200,
-        statusMessage: 'Fetched successfully',
-        data: {
-          data: {
-            boardId: 1,
-            boardName: 'My Board',
-            items: [
-              {
-                id: 1,
-                itemId: '123456789',
-                itemName: 'Deal 1',
-                amount: 5000,
-                status: 'closedwon'
-              },
-              {
-                id: 2,
-                itemId: '987654321',
-                itemName: 'Deal 2',
-                amount: 3000,
-                status: 'closedwon'
-              }
-            ]
-          }
-        }
-      });
-    });
+  it("should throw error if axios call fails", async () => {
+    mockAxios.onPost(process.env.API_URL).networkError();
 
-    it('should return error if getBoard throws', async () => {
-      const result = await getBoard({ triggerError: true });
-      expect(result).toEqual({
-        statusCode: 400,
-        data: {},
-        message: 'Validation error.',
-        error: 'Test error'
-      });
+    await expect(generateBoard(validPayload)).rejects.toMatchObject({
+      message: expect.stringContaining("Failed to create item on Monday.com"),
+      status: 500,
     });
   });
 });
