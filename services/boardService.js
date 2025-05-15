@@ -7,6 +7,26 @@ export const generateBoard = async (webhookPayload) => {
     dealAmount,
     contactEmail,
   } = webhookPayload;
+
+
+  const requiredFields = { dealName, propertyValue: dealStage, dealAmount, contactEmail, objectType, objectId, propertyName, eventType,  };
+  const missingFields = Object.entries(requiredFields)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
+
+if (missingFields.length > 0) {
+  return {
+    statusCode: 400,
+    message: "Missing required fields",
+    detail: missingFields.map(field => ({
+      type: "missing",
+      loc: ["body", field],
+      msg: "Field required",
+    })),
+  };
+}
+
+  
   const boardId = 2012772463;
   const columnValues = {
     status: { label: dealStage === "closedwon" ? "Closed Won" : "Open" },
