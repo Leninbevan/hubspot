@@ -32,7 +32,7 @@ In production, I verify the webhook using a JWT token. I include a secret token 
 
 ### 7.What is your approach to ensure idempotency if the webhook is received multiple times?
 
-To ensure idempotency, I generate a unique identifier from the webhook payload, such as the event ID. I then store this identifier in MongoDB. Before processing a webhook and creating a new item, I check the database to see if this event ID already exists. If it does, I avoid creating a duplicate and return a clear duplicate error message. This way, I prevent processing the same webhook multiple times.
+To ensure idempotency, I generate a unique identifier from the webhook payload, such as the event ID. I then store this identifier in D. Before processing a webhook and creating a new item, I check the database to see if this event ID already exists. If it does, I avoid creating a duplicate and return a clear duplicate error message. This way, I prevent processing the same webhook multiple times.
 
 ### 8.How would you handle API rate limits effectively?
 
