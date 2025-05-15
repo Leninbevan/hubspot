@@ -6,27 +6,27 @@ This mini task automates the creation of items on a Monday.com board using their
 
 HUBSPOT/
 ├── controllers/
-│   └── boardControllers.js          
+│   └── boardControllers.js
 ├── modals/
-│   └── boardItemsModal.js            
-├── node_modules/                    
+│   └── boardItemsModal.js
+├── node_modules/
 ├── routes/
-│   └── boardRoutes.js               
+│   └── boardRoutes.js
 ├── services/
-│   └── boardService.js              
+│   └── boardService.js
 ├── tests/
-│   ├── boardService.test.js         
+│   ├── boardService.test.js
 │   └── createBoardController.test.js
-├── .babelrc                         
-├── .env                             
-├── .gitignore                       
-├── app.js                           
-├── jest.config.js                   
-├── package-lock.json                
-├── package.json                     
-└── README.md                     
+├── .babelrc
+├── .env
+├── .gitignore
+├── app.js
+├── jest.config.js
+├── package-lock.json
+├── package.json
+└── README.md
 
-##  Setup Instructions
+## Setup Instructions
 
 ### 1. Clone the Repository
 
